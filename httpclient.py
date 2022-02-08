@@ -110,7 +110,7 @@ class HTTPClient(object):
         length = 0
         self.connect(host, port)
         strPort = str(port)
-        request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nAccept: */*\r\nContent-type: application/application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n"
+        request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nAccept: */*\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n"
         if args: 
             length = len(urlencode(args))
             request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nAccept: */*\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n" + urlencode(args) + "\r\n"
