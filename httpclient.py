@@ -58,6 +58,18 @@ class HTTPClient(object):
     def close(self):
         self.socket.close()
 
+    # read everything from the socket
+    def recvall(self, sock):
+        buffer = bytearray()
+        done = False
+        while not done:
+            part = sock.recv(1024)
+            if (part):
+                buffer.extend(part)
+            else:
+                done = not part
+        return buffer.decode('utf-8')
+
     def identify_the_source(self, url):
         #default host and port 
         hostname = socket.gethostbyname('localhost')
@@ -71,18 +83,6 @@ class HTTPClient(object):
             path = urlparse(url).path
 
         return hostname, port, path
-
-    # read everything from the socket
-    def recvall(self, sock):
-        buffer = bytearray()
-        done = False
-        while not done:
-            part = sock.recv(1024)
-            if (part):
-                buffer.extend(part)
-            else:
-                done = not part
-        return buffer.decode('utf-8')
 
     def GET(self, url, args=None):
         code = 500
