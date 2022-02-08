@@ -22,7 +22,7 @@ import sys
 import socket
 import re
 # you may use urllib to encode data appropriately
-import urllib.parse
+from urllib.parse import urlparse, urlencode
 
 def help():
     print("httpclient.py [GET/POST] [URL]\n")
@@ -41,19 +41,38 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        return None
+        # print ("the data 1 is:",data.split()[1])
+        code = int(data.split()[1])
+        return code
 
     def get_headers(self,data):
-        return None
+        header = data.split("\r\n\r\n")[0]
+        return header
 
     def get_body(self, data):
-        return None
+        body = data.split("\r\n\r\n")[1]
+        return body
     
     def sendall(self, data):
+        # print ("########data type is: ", type(data))
         self.socket.sendall(data.encode('utf-8'))
         
     def close(self):
         self.socket.close()
+
+    def identify_the_source(self, url):
+        #default host and port 
+        hostname = socket.gethostbyname('localhost')
+        port = 80
+        path = "/"
+        if urlparse(url).port: 
+            port = urlparse(url).port
+        if urlparse(url).hostname:
+            hostname = urlparse(url).hostname
+        if urlparse(url).path:
+            path = urlparse(url).path
+
+        return hostname, port, path
 
     # read everything from the socket
     def recvall(self, sock):
@@ -68,13 +87,45 @@ class HTTPClient(object):
         return buffer.decode('utf-8')
 
     def GET(self, url, args=None):
+        # print ("##########URL is : ", url)
         code = 500
         body = ""
+        host, port, path = self.identify_the_source(url)
+
+        print ("host; port; path are :", host, port, path)
+        self.connect(host, port)
+        #self.request.sendall(bytearray("GET " + path + "HTTP/1.1\r\nHost: " + host + port + "\r\n\Connection: close\r\n\r\n",'utf-8'))
+        strPort = str(port)
+        request = "GET " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nConnection: close\r\n\r\n"
+        self.sendall(request)
+        data = self.recvall(self.socket)
+        # print ("############DATA is : ", data)
+        self.close()
+        # print ("############the return data is: ", data)
+        code = self.get_code(data)
+        body = self.get_body(data)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
+        # print ("############URL is : ", url)
         code = 500
         body = ""
+        host, port, path = self.identify_the_source(url)
+        length = 0
+        # print ("host; port; path are :", host, port, path)
+        self.connect(host, port)
+        strPort = str(port)
+        request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nContent-type: application/application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n"
+        if args: 
+            length = len(urlencode(args))
+            request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n" + urlencode(args) + "\r\n"
+            print ("########request is : ", request)
+        
+        self.sendall(request)
+        data = self.recvall(self.socket)
+        self.close()
+        code = self.get_code(data)
+        body = self.get_body(data)
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
