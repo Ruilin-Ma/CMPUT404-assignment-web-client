@@ -41,7 +41,6 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        # print ("the data 1 is:",data.split()[1])
         code = int(data.split()[1])
         return code
 
@@ -54,7 +53,6 @@ class HTTPClient(object):
         return body
     
     def sendall(self, data):
-        # print ("########data type is: ", type(data))
         self.socket.sendall(data.encode('utf-8'))
         
     def close(self):
@@ -87,39 +85,33 @@ class HTTPClient(object):
         return buffer.decode('utf-8')
 
     def GET(self, url, args=None):
-        # print ("##########URL is : ", url)
         code = 500
         body = ""
-        host, port, path = self.identify_the_source(url)
 
+        host, port, path = self.identify_the_source(url)
         print ("host; port; path are :", host, port, path)
         self.connect(host, port)
-        #self.request.sendall(bytearray("GET " + path + "HTTP/1.1\r\nHost: " + host + port + "\r\n\Connection: close\r\n\r\n",'utf-8'))
         strPort = str(port)
         request = "GET " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nConnection: close\r\n\r\n"
         self.sendall(request)
         data = self.recvall(self.socket)
-        # print ("############DATA is : ", data)
         self.close()
-        # print ("############the return data is: ", data)
         code = self.get_code(data)
         body = self.get_body(data)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
-        # print ("############URL is : ", url)
         code = 500
         body = ""
+
         host, port, path = self.identify_the_source(url)
         length = 0
-        # print ("host; port; path are :", host, port, path)
         self.connect(host, port)
         strPort = str(port)
-        request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nContent-type: application/application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n"
+        request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nAccept: */*\r\nContent-type: application/application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n"
         if args: 
             length = len(urlencode(args))
-            request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n" + urlencode(args) + "\r\n"
-            print ("########request is : ", request)
+            request = "POST " + path + " HTTP/1.1\r\nHost: " + host +":"+ strPort + "\r\nAccept: */*\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: "+str(length)+"\r\nConnection: close\r\n\r\n" + urlencode(args) + "\r\n"
         
         self.sendall(request)
         data = self.recvall(self.socket)
