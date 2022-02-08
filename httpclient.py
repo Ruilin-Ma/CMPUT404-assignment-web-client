@@ -73,6 +73,8 @@ class HTTPClient(object):
     def identify_the_source(self, url):
         #default host and port 
         hostname = socket.gethostbyname('localhost')
+        "Answered by Armut at Apr 21 '17 at 18:40 "
+        "https://stackoverflow.com/questions/39970606/gaierror-errno-8-nodename-nor-servname-provided-or-not-known-with-macos-sie"
         port = 80
         path = "/"
         if urlparse(url).port: 
